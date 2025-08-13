@@ -13,9 +13,12 @@
     "@milkdown/core": "^7.15.3",
     "@milkdown/plugin-clipboard": "^7.15.3",
     "@milkdown/plugin-history": "^7.15.3",
+    "@milkdown/plugin-listener": "^7.15.3",
     "@milkdown/preset-gfm": "^7.15.3",
     "@milkdown/prose": "^7.15.3",
     "@milkdown/react": "^7.15.3",
+    "@milkdown/theme-nord": "^7.15.3",
+    "@milkdown/transformer": "^7.15.3",
     "@milkdown/utils": "^7.15.3",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -38,6 +41,8 @@
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
