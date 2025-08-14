@@ -1,84 +1,96 @@
 "use client";
 
-import { useEffect } from "react";
-import { useEditor, Milkdown, MilkdownProvider } from "@milkdown/react";
-import { nord } from "@milkdown/theme-nord";
-import { gfm } from "@milkdown/preset-gfm";
-import { listener, listenerCtx } from "@milkdown/plugin-listener";
-import { clipboard } from "@milkdown/plugin-clipboard";
-import { history } from "@milkdown/plugin-history";
-import { Editor, defaultValueCtx, editorViewOptionsCtx, editorViewCtx, rootCtx } from "@milkdown/core";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Undo2 } from "lucide-react";
+import { PromptToolbar } from "./PromptToolbar";
 
 type Props = {
-	value: string;
-	onChange: (markdown: string) => void;
+    value: string;
+    onChange: (markdown: string) => void;
 };
 
-// Basic toolbar for undo/redo (Milkdown exposes commands via keyboard too)
-export function PromptEditor({ value, onChange }: Props) {
-    const editor = useEditor((root) => {
-		return Editor.make()
-			.config((ctx) => {
-				ctx.set(rootCtx, root);
-				ctx.set(defaultValueCtx, value);
-				ctx.update(editorViewOptionsCtx, (prev) => ({
-					...prev,
-					attributes: { class: "prose prose-zinc dark:prose-invert max-w-none focus:outline-none" },
-				}));
-			})
-            .config(nord)
-            .use(gfm)
-            .use(clipboard)
-            .use(history)
-            .use(listener);
-	});
-
-    // Sync markdown changes using listener plugin
-    useEffect(() => {
-        if (!editor) return;
-        editor.get()?.action((ctx) => {
-            const l = ctx.get(listenerCtx);
-            l.markdownUpdated((_, markdown) => onChange(markdown));
+export function SimpleEditor({ value, onChange }: Props) {
+    const applyWrap = (syntaxBefore: string, syntaxAfter: string = syntaxBefore) => {
+        const ta = document.getElementById("simple-editor-ta") as HTMLTextAreaElement | null;
+        if (!ta) return;
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? 0;
+        const selected = value.slice(start, end);
+        const next = value.slice(0, start) + syntaxBefore + selected + syntaxAfter + value.slice(end);
+        onChange(next);
+        requestAnimationFrame(() => {
+            const pos = start + syntaxBefore.length + selected.length + syntaxAfter.length;
+            ta.focus();
+            ta.setSelectionRange(pos, pos);
         });
-    }, [editor, onChange]);
+    };
 
-    // Update editor when external value changes (e.g., reset)
-	useEffect(() => {
-		if (!editor) return;
-		editor.get()?.action((ctx) => {
-			const view = ctx.get(editorViewCtx);
-			const { state } = view;
-			const tr = state.tr;
-			tr.delete(0, state.doc.content.size);
-			tr.insertText(value, 0);
-			view.dispatch(tr);
-		});
-	}, [value, editor]);
+    const onBold = () => applyWrap("**");
+    const onItalic = () => applyWrap("_");
+    const onUnderline = () => applyWrap("<u>", "</u>");
+    const onH = (level: 1 | 2 | 3) => {
+        const ta = document.getElementById("simple-editor-ta") as HTMLTextAreaElement | null;
+        if (!ta) return;
+        const start = ta.selectionStart ?? 0;
+        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+        const prefix = "#".repeat(level) + " ";
+        const next = value.slice(0, lineStart) + prefix + value.slice(lineStart);
+        onChange(next);
+        requestAnimationFrame(() => {
+            const pos = lineStart + prefix.length;
+            ta.focus();
+            ta.setSelectionRange(pos, pos);
+        });
+    };
+    const onBullet = () => {
+        const ta = document.getElementById("simple-editor-ta") as HTMLTextAreaElement | null;
+        if (!ta) return;
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? 0;
+        const before = value.slice(0, start);
+        const selected = value.slice(start, end);
+        const after = value.slice(end);
+        const lines = (selected || value.slice(value.lastIndexOf("\n", start - 1) + 1, value.indexOf("\n", start) === -1 ? value.length : value.indexOf("\n", start))).split("\n");
+        const bulletLines = lines.map((l) => (l.startsWith("- ") ? l : `- ${l}`)).join("\n");
+        const next = selected ? before + bulletLines + after : value.replace(lines.join("\n"), bulletLines);
+        onChange(next);
+        requestAnimationFrame(() => {
+            const pos = (before + bulletLines).length;
+            ta.focus();
+            ta.setSelectionRange(pos, pos);
+        });
+    };
+    const onOrdered = () => {
+        const ta = document.getElementById("simple-editor-ta") as HTMLTextAreaElement | null;
+        if (!ta) return;
+        const start = ta.selectionStart ?? 0;
+        const end = ta.selectionEnd ?? 0;
+        const before = value.slice(0, start);
+        const selected = value.slice(start, end);
+        const after = value.slice(end);
+        const lines = (selected || value.slice(value.lastIndexOf("\n", start - 1) + 1, value.indexOf("\n", start) === -1 ? value.length : value.indexOf("\n", start))).split("\n");
+        const orderedLines = lines.map((l, i) => (l.match(/^\d+\.\s/) ? l : `${i + 1}. ${l}`)).join("\n");
+        const next = selected ? before + orderedLines + after : value.replace(lines.join("\n"), orderedLines);
+        onChange(next);
+        requestAnimationFrame(() => {
+            const pos = (before + orderedLines).length;
+            ta.focus();
+            ta.setSelectionRange(pos, pos);
+        });
+    };
 
-	return (
-		<div className="flex h-full flex-col gap-2">
-			<div className="flex items-center gap-1">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button type="button" size="icon" variant="ghost" aria-label="Annuler (Ctrl+Z)">
-								<Undo2 className="size-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Annuler (Ctrl+Z)</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			</div>
-			<div className="min-h-[320px] grow rounded-lg border bg-background/60 p-3">
-				<MilkdownProvider>
-					<Milkdown />
-				</MilkdownProvider>
-			</div>
-		</div>
-	);
+    return (
+        <div className="flex h-full flex-col gap-2">
+            <div className="flex items-center gap-2">
+                <PromptToolbar onBold={onBold} onItalic={onItalic} onUnderline={onUnderline} onH={onH} onBullet={onBullet} onOrdered={onOrdered} />
+            </div>
+            <textarea
+                id="simple-editor-ta"
+                className="w-full h-full resize-none bg-transparent outline-none border-0 p-0 prose prose-zinc dark:prose-invert"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Saisissez votre prompt..."
+            />
+        </div>
+    );
 }
 
 

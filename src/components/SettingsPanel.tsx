@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CARD_STYLES, FONT_OPTIONS, GRADIENTS, AspectRatioOption } from "@/lib/presets";
 
@@ -26,11 +25,11 @@ type Props = {
 };
 
 export function SettingsPanel(props: Props) {
-	const { font, setFont, gradientId, setGradientId, cardStyleId, setCardStyleId, aspect, setAspect, transparent, setTransparent, fontSize, setFontSize, onExport } = props;
+    const { font, setFont, gradientId, setGradientId, cardStyleId, setCardStyleId, aspect, setAspect, transparent, setTransparent, fontSize, setFontSize, onExport } = props;
 
-	return (
-		<div className="flex h-full flex-col gap-4 p-3">
-			<div>
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3">
+            <div>
 				<Label>Police</Label>
 				<Select value={font} onValueChange={setFont}>
 					<SelectTrigger className="mt-1">
@@ -44,7 +43,7 @@ export function SettingsPanel(props: Props) {
 				</Select>
 			</div>
 
-			<div>
+            <div>
 				<Label>Dégradé de fond</Label>
 				<Select value={gradientId} onValueChange={setGradientId}>
 					<SelectTrigger className="mt-1">
@@ -58,7 +57,7 @@ export function SettingsPanel(props: Props) {
 				</Select>
 			</div>
 
-			<div>
+            <div>
 				<Label>Style de carte</Label>
 				<Select value={cardStyleId} onValueChange={setCardStyleId}>
 					<SelectTrigger className="mt-1">
@@ -72,9 +71,9 @@ export function SettingsPanel(props: Props) {
 				</Select>
 			</div>
 
-			<div>
-				<Label>Taille de police</Label>
-    	<Select value={fontSize} onValueChange={(v) => setFontSize(v as "sm" | "md" | "lg")}>
+            <div>
+                <Label>Taille de police</Label>
+                	<Select value={fontSize} onValueChange={(v) => setFontSize(v as "sm" | "md" | "lg")}>
 					<SelectTrigger className="mt-1">
 						<SelectValue placeholder="Taille" />
 					</SelectTrigger>
@@ -86,14 +85,12 @@ export function SettingsPanel(props: Props) {
 				</Select>
 			</div>
 
-			<Separator />
-
-			<div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
 				<Label>Fond transparent</Label>
 				<Switch checked={transparent} onCheckedChange={setTransparent} />
 			</div>
 
-			<div>
+            <div>
 				<Label>Format d&apos;export</Label>
 				<div className="mt-2 grid grid-cols-2 gap-2">
 					<Button variant={aspect === "16:9" ? "default" : "outline"} onClick={() => setAspect("16:9")}>16:9</Button>
@@ -101,9 +98,9 @@ export function SettingsPanel(props: Props) {
 				</div>
 			</div>
 
-			<Separator />
-
-			<Button className="w-full" onClick={onExport}>Exporter en PNG</Button>
+            <div className="col-span-1 sm:col-span-2">
+                <Button className="w-full" onClick={onExport}>Exporter en PNG</Button>
+            </div>
 		</div>
 	);
 }
