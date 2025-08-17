@@ -1,11 +1,9 @@
 "use client";
 
-import { } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CARD_STYLES, FONT_OPTIONS, GRADIENTS, AspectRatioOption } from "@/lib/presets";
 
 type Props = {
@@ -28,7 +26,7 @@ export function SettingsPanel(props: Props) {
     const { font, setFont, gradientId, setGradientId, cardStyleId, setCardStyleId, aspect, setAspect, transparent, setTransparent, fontSize, setFontSize, onExport } = props;
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3">
+        <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 lg:grid-cols-2 lg:gap-4">
             <div>
 				<Label>Police</Label>
 				<Select value={font} onValueChange={setFont}>
@@ -98,7 +96,7 @@ export function SettingsPanel(props: Props) {
 				</div>
 			</div>
 
-            <div className="col-span-1 sm:col-span-2">
+            <div className="col-span-2 md:col-span-3 lg:col-span-2">
                 <Button className="w-full" onClick={onExport}>Exporter en PNG</Button>
             </div>
 		</div>
